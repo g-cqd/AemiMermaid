@@ -26,6 +26,7 @@ let package = Package(
         .library(name: "AemiMermaidScene", targets: ["AemiMermaidScene"]),
         .library(name: "AemiMermaidLayout", targets: ["AemiMermaidLayout"]),
         .library(name: "AemiMermaidText", targets: ["AemiMermaidText"]),
+        .library(name: "AemiMermaidSVG", targets: ["AemiMermaidSVG"]),
         .executable(name: "aemi-mermaid", targets: ["aemi-mermaid"])
     ],
     dependencies: [aemiDependency],
@@ -46,9 +47,16 @@ let package = Package(
             dependencies: ["AemiMermaidScene"],
             swiftSettings: strictSettings
         ),
+        .target(
+            name: "AemiMermaidSVG",
+            dependencies: ["AemiMermaidScene", "AemiMermaidSyntax"],
+            swiftSettings: strictSettings
+        ),
         .executableTarget(
             name: "aemi-mermaid",
-            dependencies: ["AemiMermaidSyntax", "AemiMermaidScene", "AemiMermaidLayout", "AemiMermaidText"],
+            dependencies: [
+                "AemiMermaidSyntax", "AemiMermaidScene", "AemiMermaidLayout", "AemiMermaidText", "AemiMermaidSVG"
+            ],
             swiftSettings: strictSettings
         ),
         // Alone in its process: it counts instructions, and a count is only a count of this test when no other test runs beside it.
@@ -64,7 +72,7 @@ let package = Package(
         .testTarget(
             name: "AemiMermaidTests",
             dependencies: [
-                "AemiMermaidSyntax", "AemiMermaidScene", "AemiMermaidLayout", "AemiMermaidText",
+                "AemiMermaidSyntax", "AemiMermaidScene", "AemiMermaidLayout", "AemiMermaidText", "AemiMermaidSVG",
                 .product(name: "AemiTestKit", package: "aemi")
             ],
             swiftSettings: strictSettings
