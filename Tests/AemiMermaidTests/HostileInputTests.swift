@@ -106,7 +106,7 @@ struct HostileInputTests {
         ] {
             let result = runOnConstrainedStack { MermaidParse.parse(Array(source.utf8)).result }
             switch result {
-                case .flowchart, .sequence, .refused: break
+                case .flowchart, .sequence, .pie, .refused: break
             }
         }
     }

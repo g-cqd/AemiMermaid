@@ -3,6 +3,7 @@ public struct MermaidParse: Sendable {
     public enum Result: Sendable {
         case flowchart(FlowchartDiagram)
         case sequence(SequenceDiagram)
+        case pie(PieDiagram)
         case refused(MermaidRefusal)
     }
 
@@ -21,15 +22,45 @@ public struct MermaidParse: Sendable {
             return MermaidParse(result: .refused(.unknownKind), diagnostics: MermaidDiagnostics())
         }
         switch header.kind {
-            case .flowchart:
-                var parser = FlowchartParser(source: source, limits: limits, direction: header.direction)
-                parser.run(from: header.restOffset, firstLine: header.firstLine)
-                return conclude(parser.reader, isEmpty: parser.diagram.nodes.isEmpty, .flowchart(parser.diagram))
+            case .flowchart: return flowchart(source, limits, header)
+            case .state:
+                return flowchart(
+                    translate(StateTranslator(direction: StateTranslator.direction(in: source)), source),
+                    limits,
+                    nil
+                )
+            case .classes:
+                return flowchart(
+                    translate(ClassTranslator(direction: ClassTranslator.direction(in: source)), source),
+                    limits,
+                    nil
+                )
+            case .entities: return flowchart(translate(EntityTranslator(), source), limits, nil)
             case .sequence:
                 var parser = SequenceParser(source: source, limits: limits)
                 parser.run(from: header.restOffset, firstLine: header.firstLine)
                 return conclude(parser.reader, isEmpty: parser.diagram.participants.isEmpty, .sequence(parser.diagram))
+            case .pie:
+                var parser = PieParser(source: source, limits: limits)
+                parser.readHeaderRest(header.rest)
+                parser.run(from: header.restOffset, firstLine: header.firstLine)
+                return conclude(parser.reader, isEmpty: parser.diagram.slices.isEmpty, .pie(parser.diagram))
         }
+    }
+
+    private static func translate(_ translator: some LineTranslator, _ source: [UInt8]) -> [UInt8] {
+        var translator = translator
+        return translator.run(source)
+    }
+
+    /// A flowchart, or a diagram written as one by a translator (its header is then the flowchart's, found again).
+    private static func flowchart(_ source: [UInt8], _ limits: MermaidLimits, _ known: MermaidHeader?) -> MermaidParse {
+        guard let header = known ?? MermaidHeader.find(in: source) else {
+            return MermaidParse(result: .refused(.unknownKind), diagnostics: MermaidDiagnostics())
+        }
+        var parser = FlowchartParser(source: source, limits: limits, direction: header.direction)
+        parser.run(from: header.restOffset, firstLine: header.firstLine)
+        return conclude(parser.reader, isEmpty: parser.diagram.nodes.isEmpty, .flowchart(parser.diagram))
     }
 
     /// The parse once the lines are read: a refusal if a limit was passed, or the diagram is empty.

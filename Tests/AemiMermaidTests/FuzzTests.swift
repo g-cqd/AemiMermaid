@@ -14,11 +14,8 @@ struct FuzzTests {
         let parse = MermaidParse.parse(bytes, limits: .terminal)
         var scene = DiagramScene()
         var problems: [String] = []
-        switch parse.result {
-            case .flowchart(let diagram): _ = FlowLayout.lay(diagram, maxWidth: 100, into: &scene)
-            case .sequence(let diagram): _ = SequenceLayout.lay(diagram, maxWidth: 100, into: &scene)
-            case .refused: return ([], [])
-        }
+        if case .refused = parse.result { return ([], []) }
+        _ = MermaidLayout.lay(parse.result, maxWidth: 100, into: &scene)
         problems = SceneLinter.problems(scene, checkEdges: false)
         return (problems, TextRenderer().text(scene) ?? [])
     }

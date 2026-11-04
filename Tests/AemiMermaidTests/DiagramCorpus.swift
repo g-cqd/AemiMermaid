@@ -20,5 +20,24 @@ enum DiagramCorpus {
         "sequenceDiagram\n  title Order\n  Customer->>Shop: order\n  Shop-->>Customer: receipt"
     ]
 
-    static var all: [String] { flowcharts + sequences }
+    static let states: [String] = [
+        "stateDiagram-v2\n  [*] --> Still\n  Still --> [*]\n  Still --> Moving : push\n  Moving --> Still\n  Moving --> Crash\n  Crash --> [*]",
+        "stateDiagram-v2\n  direction LR\n  state \"Waiting for input\" as W\n  [*] --> W\n  W --> Active : key\n  state Active {\n    [*] --> Typing\n    Typing --> Done\n  }\n  Active --> [*]\n  W : idle\n  state c <<choice>>\n  Done --> c\n  c --> W : again"
+    ]
+
+    static let classes: [String] = [
+        "classDiagram\n  Animal <|-- Duck\n  Animal <|-- Fish\n  Animal : +int age\n  Animal : +isMammal()\n  class Duck {\n    +String beakColor\n    +swim()\n  }\n  Duck *-- Egg : lays\n  Owner \"1\" --> \"*\" Animal : owns",
+        "classDiagram\n  direction LR\n  class Shape {\n    <<interface>>\n    +area() double\n  }\n  Shape <|.. Circle\n  Shape <|.. Square\n  Circle ..> Pi"
+    ]
+
+    static let entities: [String] = [
+        "erDiagram\n  CUSTOMER ||--o{ ORDER : places\n  ORDER ||--|{ LINE-ITEM : contains\n  CUSTOMER }|..|{ DELIVERY-ADDRESS : uses\n  CUSTOMER {\n    string name PK\n    string email UK\n  }"
+    ]
+
+    static let pies: [String] = [
+        "pie showData title Pets adopted\n  \"Dogs\" : 386\n  \"Cats\" : 85\n  \"Rats\" : 15",
+        "pie\n  title Key elements\n  \"Calcium\" : 42.96\n  \"Potassium\" : 50.05\n  \"Magnesium\" : 10.01"
+    ]
+
+    static var all: [String] { flowcharts + sequences + states + classes + entities + pies }
 }

@@ -21,8 +21,7 @@ flowchart LR
 ```swift
 let parse = MermaidParse.parse(Array(source.utf8), limits: .terminal)
 var scene = DiagramScene()
-if case .flowchart(let diagram) = parse.result,
-    case .drawn = FlowLayout.lay(diagram, maxWidth: 80, into: &scene),
+if case .drawn = MermaidLayout.lay(parse.result, maxWidth: 80, into: &scene),
     let lines = TextRenderer().text(scene)
 {
     print(lines.joined(separator: "\n"))
@@ -30,10 +29,10 @@ if case .flowchart(let diagram) = parse.result,
 ```
 
 What it accepts (flowchart: the headers, shapes, links, labels, chains, groups and subgraphs of the plan's Appendix B; sequence: participants, actors, the eight arrows, activations,
-notes, fragments, autonumber, title) and how it degrades are in `docs/adr/0001-the-engine.md`. A line it cannot read is dropped with a diagnostic naming it; a diagram it cannot
+notes, fragments, autonumber, title; state, class and entity-relationship diagrams, read as flowcharts (ADR 0005); pie charts as bars) and how it degrades are in `docs/adr/0001-the-engine.md`. A line it cannot read is dropped with a diagnostic naming it; a diagram it cannot
 draw within the limits is refused with the figure, and the host shows the source.
 
-Not done yet: state, class, ER, pie and Gantt diagrams; the vector backend and the SwiftUI view; the Quick Look extension (ask's roadmap 0199 to 0201).
+Not done yet: Gantt, mindmap, journey, timeline and git graph; the vector backend and the SwiftUI view; the Quick Look extension (ask's roadmap 0199 to 0201).
 
 ## Guarantees, each with a test
 

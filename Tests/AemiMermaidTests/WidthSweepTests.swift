@@ -15,17 +15,9 @@ struct WidthSweepTests {
         let renderer = TextRenderer()
         for width in 1 ... 120 {
             var fresh = DiagramScene()
-            let outcomeFresh: MermaidLayoutOutcome
-            let outcomeReused: MermaidLayoutOutcome
-            switch parse.result {
-                case .flowchart(let diagram):
-                    outcomeFresh = FlowLayout.lay(diagram, maxWidth: width, into: &fresh)
-                    outcomeReused = FlowLayout.lay(diagram, maxWidth: width, into: &reused)
-                case .sequence(let diagram):
-                    outcomeFresh = SequenceLayout.lay(diagram, maxWidth: width, into: &fresh)
-                    outcomeReused = SequenceLayout.lay(diagram, maxWidth: width, into: &reused)
-                case .refused: return
-            }
+            if case .refused = parse.result { return }
+            let outcomeFresh = MermaidLayout.lay(parse.result, maxWidth: width, into: &fresh)
+            let outcomeReused = MermaidLayout.lay(parse.result, maxWidth: width, into: &reused)
             #expect(outcomeFresh == outcomeReused && fresh == reused, "width \(width)")
             switch outcomeFresh {
                 case .drawn(let drawnWidth, _):

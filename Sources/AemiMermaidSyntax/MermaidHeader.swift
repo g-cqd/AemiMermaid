@@ -4,6 +4,8 @@ struct MermaidHeader {
     var direction: FlowDirection
     var restOffset: Int
     var firstLine: Int
+    /// What follows the first word on the header line (`pie title Pets`).
+    var rest: ArraySlice<UInt8>
 
     /// Skips blank lines, comments and a front matter block (`---` to `---`); nil if the first other line is not a header this engine reads.
     static func find(in source: [UInt8]) -> MermaidHeader? {
@@ -27,7 +29,8 @@ struct MermaidHeader {
                     kind: header.kind,
                     direction: header.direction,
                     restOffset: Swift.min(cursor, source.count),
-                    firstLine: line + 1
+                    firstLine: line + 1,
+                    rest: text.drop { $0 != 0x20 && $0 != 0x09 }
                 )
             } else {
                 return nil

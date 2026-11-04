@@ -18,14 +18,11 @@ let input =
     ?? FileHandle.standardInput.readDataToEndOfFile()
 let parse = MermaidParse.parse(Array(input), limits: .terminal)
 var scene = DiagramScene()
-let outcome: MermaidLayoutOutcome
-switch parse.result {
-    case .flowchart(let diagram): outcome = FlowLayout.lay(diagram, maxWidth: width, into: &scene)
-    case .sequence(let diagram): outcome = SequenceLayout.lay(diagram, maxWidth: width, into: &scene)
-    case .refused(let reason):
-        FileHandle.standardError.write(Data("not drawn: \(reason)\n".utf8))
-        exit(1)
+if case .refused(let reason) = parse.result {
+    FileHandle.standardError.write(Data("not drawn: \(reason)\n".utf8))
+    exit(1)
 }
+let outcome = MermaidLayout.lay(parse.result, maxWidth: width, into: &scene)
 guard case .drawn = outcome, let lines = TextRenderer(ascii: ascii).text(scene) else {
     FileHandle.standardError.write(Data("not drawn: \(outcome)\n".utf8))
     exit(1)

@@ -10,11 +10,7 @@ struct TextRendererTests {
     private func render(_ source: String, ascii: Bool = false, width: Int? = nil) throws -> [String] {
         let parse = MermaidParse.parse(Array(source.utf8), limits: .terminal)
         var scene = DiagramScene()
-        switch parse.result {
-            case .flowchart(let diagram): _ = FlowLayout.lay(diagram, maxWidth: width, into: &scene)
-            case .sequence(let diagram): _ = SequenceLayout.lay(diagram, maxWidth: width, into: &scene)
-            case .refused: break
-        }
+        _ = MermaidLayout.lay(parse.result, maxWidth: width, into: &scene)
         return try #require(TextRenderer(ascii: ascii).text(scene))
     }
 
@@ -84,11 +80,8 @@ struct TextRendererTests {
         let renderer = TextRenderer()
         let parse = MermaidParse.parse(Array(source.utf8), limits: .terminal)
         var scene = DiagramScene()
-        switch parse.result {
-            case .flowchart(let diagram): _ = FlowLayout.lay(diagram, into: &scene)
-            case .sequence(let diagram): _ = SequenceLayout.lay(diagram, into: &scene)
-            case .refused: return
-        }
+        if case .refused = parse.result { return }
+        _ = MermaidLayout.lay(parse.result, into: &scene)
         for line in try #require(renderer.text(scene)) {
             #expect(renderer.metrics.width(of: ArraySlice(line.utf8)) <= Int(scene.width))
         }
