@@ -65,8 +65,11 @@ struct FlowLayoutRun {
                 case .diamond, .hexagon, .circle, .doubleCircle, .stadium, .cylinder: extra = 2
                 default: extra = 0
             }
-            let width = label.width + 4 + extra
-            let height = label.lines.count + 2 + (node.shape == .cylinder ? 1 : 0)
+            var width = label.width + 4 + extra
+            var height = label.lines.count + 2 + (node.shape == .cylinder ? 1 : 0)
+            // Along the order axis a box is an odd number of cells, so its middle is a cell: edges leave from that column, and the vector backend draws the box around the same middle.
+            if vertical, width % 2 == 0 { width += 1 }
+            if !vertical, height % 2 == 0 { height += 1 }
             _ = graph.addNode(rank: 0, sizeA: vertical ? height : width, sizeB: vertical ? width : height)
         }
         graph.realCount = diagram.nodes.count

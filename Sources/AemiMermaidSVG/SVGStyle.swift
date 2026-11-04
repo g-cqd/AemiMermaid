@@ -22,7 +22,7 @@ public enum SVGStyle {
         svg.mermaid text { fill: var(--text); stroke: none; }
         svg.mermaid text.ct { fill: var(--muted); font-weight: 500; paint-order: stroke; stroke: var(--surface); stroke-width: 6px; stroke-linejoin: round; }
         svg.mermaid text.l { fill: var(--text); }
-        svg.mermaid text.el { fill: var(--muted); font-size: 0.92em; paint-order: stroke; stroke: var(--surface); stroke-width: 5px; stroke-linejoin: round; }
+        svg.mermaid text.el { fill: var(--muted); font-size: 0.92em; }
         svg.mermaid .s0 { fill: var(--s0); } svg.mermaid .s1 { fill: var(--s1); } svg.mermaid .s2 { fill: var(--s2); } svg.mermaid .s3 { fill: var(--s3); }
         svg.mermaid .s4 { fill: var(--s4); } svg.mermaid .s5 { fill: var(--s5); } svg.mermaid .s6 { fill: var(--s6); } svg.mermaid .s7 { fill: var(--s7); }
         """
