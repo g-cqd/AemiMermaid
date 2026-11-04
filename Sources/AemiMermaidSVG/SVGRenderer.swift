@@ -39,7 +39,8 @@ public struct SVGRenderer: Sendable {
                 case .center: "middle"
                 case .trailing: "end"
             }
-        let px = text.anchor == .leading ? x(Int32(text.x)) : cx(Int32(text.x))
+        // Leading and trailing are cell edges (the start, and the exclusive end, of the text); centre is the middle of its cell.
+        let px = text.anchor == .center ? cx(Int32(text.x)) : x(Int32(text.x))
         let role = text.role == .clusterTitle ? "ct" : (text.role == .label ? "el" : "l")
         return line(scene.string(text.text), x: px, baseline: cy(text.y) + 4.5, anchor: anchor, class: role)
     }

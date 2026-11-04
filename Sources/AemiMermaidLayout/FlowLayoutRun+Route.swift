@@ -17,16 +17,47 @@ extension FlowLayoutRun {
         let slot = Int32(labelSlot[edge])
         let low = towardsLow
         if diagram.direction.isVertical {
-            // On the right of a line that has a sibling to its right, past that sibling.
-            let b = low ? from - 1 - width : from + 2 + Swift.max(0, -portShift[edge]) * 2
-            extent.b = Swift.max(extent.b, b + width)
-            overhang = Swift.max(overhang, -b)
+            // Against its own line: right-aligned on the left of it, or starting just right of it. Its edge has a column of its own, so nothing is in the way.
+            labelTrailing[edge] = low
+            let b = low ? from - 1 : from + 2
+            extent.b = Swift.max(extent.b, low ? from : b + width)
+            overhang = Swift.max(overhang, low ? width + 1 - from : -b)
             return (channelStart + slot, b)
         }
         let b = low ? from - 1 - slot : from + 1 + slot
         extent.b = Swift.max(extent.b, b + 1)
         overhang = Swift.max(overhang, -b)
         return (channelStart + 1, b)
+    }
+
+    /// Whether the text of `edge`'s label, at `place` on the given side of its line, would sit on a vertical run of any other edge.
+    private func labelCrosses(_ edge: Int, at place: (a: Int32, b: Int32), trailing: Bool) -> Bool {
+        let width = Int32(labelWidth(edge))
+        let (low, high) = trailing ? (place.b - width, place.b) : (place.b, place.b + width)
+        for (other, route) in routes.enumerated() where other != edge {
+            for (from, to) in zip(route, route.dropFirst()) where from.b == to.b && from.b >= low && from.b < high {
+                if Swift.min(from.a, to.a) <= place.a && place.a <= Swift.max(from.a, to.a) { return true }
+            }
+        }
+        return false
+    }
+
+    /// Once every edge is routed: a label that would sit on another edge's line goes to the other side of its own, if that side is clear.
+    private mutating func clearLabels() {
+        for edge in routes.indices {
+            guard let place = labelAt[edge], !diagram.edges[edge].label.isEmpty,
+                labelCrosses(edge, at: place, trailing: labelTrailing[edge])
+            else { continue }
+            let flipped = !labelTrailing[edge]
+            let width = Int32(labelWidth(edge))
+            let line = labelTrailing[edge] ? place.b + 1 : place.b - 2
+            let moved = (a: place.a, b: flipped ? line - 1 : line + 2)
+            guard !labelCrosses(edge, at: moved, trailing: flipped) else { continue }
+            labelAt[edge] = moved
+            labelTrailing[edge] = flipped
+            extent.b = Swift.max(extent.b, flipped ? line : moved.b + width)
+            overhang = Swift.max(overhang, flipped ? width + 1 - line : -moved.b)
+        }
     }
 
     private func labelWidth(_ edge: Int) -> Int {
@@ -123,6 +154,7 @@ extension FlowLayoutRun {
     mutating func routeEdges() {
         routes = []
         labelAt = []
+        labelTrailing = [Bool](repeating: false, count: graph.chains.count)
         for (edge, chain) in graph.chains.enumerated() {
             var points: [(a: Int32, b: Int32)] = []
             var label: (a: Int32, b: Int32)?
@@ -153,7 +185,7 @@ extension FlowLayoutRun {
                     points.append((arrive, toB))
                     if hop == 0, !diagram.edges[edge].label.isEmpty {
                         // The label goes on the side its edge turns to: left of the line when the target is to the left (above it when the target is above).
-                        let towardsLow = toB < fromB || (toB == fromB && portShift[edge] < 0)
+                        let towardsLow = toB < fromB || (toB == fromB && portStart[edge] < 0)
                         label = labelPlace(edge, from: fromB, towardsLow: towardsLow, channelStart: channelStart)
                     }
                 }
@@ -161,5 +193,6 @@ extension FlowLayoutRun {
             routes.append(simplify(points))
             labelAt.append(label)
         }
+        if diagram.direction.isVertical { clearLabels() }
     }
 }

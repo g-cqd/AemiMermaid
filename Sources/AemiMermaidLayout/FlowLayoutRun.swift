@@ -19,7 +19,10 @@ struct FlowLayoutRun {
     var stubRows: [Int] = []
     var labelSlot: [Int] = []
     /// How far each edge's first and last hop are from the centre of their node, along the order axis.
-    var portShift: [Int32] = []
+    var portStart: [Int32] = []
+    var portEnd: [Int32] = []
+    /// Whether an edge's label is set against its line from the left (it ends at its anchor) instead of from the right.
+    var labelTrailing: [Bool] = []
     var rankStart: [Int32] = []
     var rankSize: [Int32] = []
     /// The route of each edge as points in (rank axis, order axis) cells, and where its label goes.

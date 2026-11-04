@@ -10,15 +10,15 @@ public enum SVGStyle {
           svg.mermaid { --stroke: #98989d; --fill: #2a2a2c; --text: #ececf0; --muted: #8e8e93;
             --s0: #8199b5; --s1: #9fbfae; --s2: #d9c79b; --s3: #cf9f96; --s4: #b3a7cc; --s5: #98c0d1; --s6: #e0d4b0; --s7: #b9b0a4; }
         }
-        svg.mermaid .n { fill: var(--fill); stroke: var(--stroke); stroke-width: 1; }
-        svg.mermaid .e { fill: none; stroke: var(--stroke); stroke-width: 1; stroke-linejoin: round; stroke-linecap: round; }
+        svg.mermaid .n { fill: var(--fill); stroke: var(--stroke); stroke-width: 1.5; stroke-linejoin: round; }
+        svg.mermaid .e { fill: none; stroke: var(--stroke); stroke-width: 1.5; stroke-linejoin: round; stroke-linecap: round; }
         svg.mermaid .e.d { stroke-dasharray: 5 4; }
-        svg.mermaid .e.t { stroke-width: 2; }
-        svg.mermaid .m { fill: var(--stroke); stroke: var(--stroke); stroke-width: 1; stroke-linejoin: round; }
-        svg.mermaid .c { fill: none; stroke: var(--muted); stroke-width: 1; stroke-dasharray: 4 3; opacity: 0.8; }
-        svg.mermaid .nt { fill: var(--surface); stroke: var(--muted); stroke-width: 1; }
-        svg.mermaid .a { stroke: var(--stroke); stroke-width: 5; fill: none; opacity: 0.45; }
-        svg.mermaid .u { stroke: var(--muted); stroke-width: 1; stroke-dasharray: 2 4; fill: none; opacity: 0.8; }
+        svg.mermaid .e.t { stroke-width: 3; }
+        svg.mermaid .m { fill: var(--stroke); stroke: var(--stroke); stroke-width: 1.5; stroke-linejoin: round; }
+        svg.mermaid .c { fill: none; stroke: var(--muted); stroke-width: 1.5; stroke-dasharray: 4 3; stroke-linecap: round; stroke-linejoin: round; opacity: 0.8; }
+        svg.mermaid .nt { fill: var(--surface); stroke: var(--muted); stroke-width: 1.5; stroke-linejoin: round; }
+        svg.mermaid .a { stroke: var(--stroke); stroke-width: 5; stroke-linecap: round; fill: none; opacity: 0.45; }
+        svg.mermaid .u { stroke: var(--muted); stroke-width: 1.5; stroke-dasharray: 0.1 5; stroke-linecap: round; fill: none; opacity: 0.8; }
         svg.mermaid text { fill: var(--text); stroke: none; }
         svg.mermaid text.ct { fill: var(--muted); font-weight: 500; paint-order: stroke; stroke: var(--surface); stroke-width: 6px; stroke-linejoin: round; }
         svg.mermaid text.l { fill: var(--text); }

@@ -167,7 +167,15 @@ extension FlowLayoutRun {
             guard let at = labelAt[index], !edge.label.isEmpty else { continue }
             let place = placement.point(at.a, at.b)
             let text = scene.addLabel(diagram.labels.slice(edge.label))
-            scene.texts.append(SceneText(x: place.x, y: place.y, anchor: .leading, role: .label, text: text))
+            scene.texts.append(
+                SceneText(
+                    x: place.x,
+                    y: place.y,
+                    anchor: labelTrailing[index] ? .trailing : .leading,
+                    role: .label,
+                    text: text
+                )
+            )
         }
     }
 }

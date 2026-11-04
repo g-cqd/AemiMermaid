@@ -38,7 +38,16 @@ struct EdgePortsTests {
     @Test func `even the narrowest pair gets two lines, and a diamond keeps its tip`() {
         #expect(Set(verticalColumns(scene("flowchart TD\n  A --> B\n  B --> A"))).count == 2)
         let diamond = scene("flowchart TD\n  A{Is it?} --> B[Yes sir]\n  B --> A")
-        #expect(Set(verticalColumns(diamond)).count == 1)
+        // Both lines leave the diamond's tip; they part at the other end, which is wide enough for two.
+        let tip = Set(diamond.paths.map { diamond.points[Int($0.first)].x })
+        #expect(tip.count == 1, "\(tip)")
+    }
+
+    @Test func `two edges into one node arrive in columns of their own`() {
+        let drawn = scene("flowchart TD\n  A[Start node] --> C[Target node]\n  A --> B[Middle node]\n  B --> C")
+        let ends = drawn.paths.map { drawn.points[Int($0.first + $0.count - 1)] }
+        let lowest = ends.map(\.y).max() ?? 0
+        #expect(Set(ends.filter { $0.y == lowest }.map(\.x)).count == 2, "\(ends)")
     }
 
     @Test func `the label of a link sits beside its own line`() {
