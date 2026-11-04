@@ -1,0 +1,24 @@
+/// The kind of diagram a source declares in its first line.
+public enum MermaidKind: UInt8, Sendable, Equatable {
+    case flowchart, sequence
+
+    /// The kind and the direction named by a header line (`flowchart LR`, `graph TD`, `sequenceDiagram`), or nil.
+    public static func header(_ line: ArraySlice<UInt8>) -> (kind: MermaidKind, direction: FlowDirection)? {
+        let words = line.split(whereSeparator: { $0 == 0x20 || $0 == 0x09 })
+        guard let first = words.first else { return nil }
+        let name = String(decoding: first, as: UTF8.self)
+        switch name {
+            case "sequenceDiagram": return (.sequence, .topDown)
+            case "flowchart", "graph", "flowchart-v2":
+                guard words.count > 1 else { return (.flowchart, .topDown) }
+                switch String(decoding: words[words.startIndex + 1], as: UTF8.self) {
+                    case "TD", "TB": return (.flowchart, .topDown)
+                    case "BT": return (.flowchart, .bottomUp)
+                    case "LR": return (.flowchart, .leftRight)
+                    case "RL": return (.flowchart, .rightLeft)
+                    default: return nil
+                }
+            default: return nil
+        }
+    }
+}
