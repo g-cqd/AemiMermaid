@@ -18,7 +18,8 @@ extension SVGRenderer {
             coordinates[coordinates.count - 1].0 + heading.dx * cellWidth,
             coordinates[coordinates.count - 1].1 + heading.dy * cellHeight
         )
-        if path.endMarker != .none { coordinates.append(tip) }
+        // An edge runs on to the border of the shape its last cell touches, with a marker or without.
+        if path.endMarker != .none || path.role == .edge { coordinates.append(tip) }
         let list = coordinates.map { SVGText.number($0.0) + "," + SVGText.number($0.1) }.joined(separator: " ")
         let name: String
         switch (path.role, path.stroke) {

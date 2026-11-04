@@ -18,12 +18,16 @@ struct FlowLayoutRun {
     var hopLane: [[Int]] = []
     var stubRows: [Int] = []
     var labelSlot: [Int] = []
+    /// How far each edge's first and last hop are from the centre of their node, along the order axis.
+    var portShift: [Int32] = []
     var rankStart: [Int32] = []
     var rankSize: [Int32] = []
     /// The route of each edge as points in (rank axis, order axis) cells, and where its label goes.
     var routes: [[(a: Int32, b: Int32)]] = []
     var labelAt: [(a: Int32, b: Int32)?] = []
     var extent = (a: Int32(0), b: Int32(0))
+    /// How far a label sticks out before the first cell of the order axis: the chart grows by that much on that side.
+    var overhang: Int32 = 0
 
     init(_ diagram: FlowchartDiagram, metrics: MermaidMetrics, limits: MermaidLimits) {
         self.diagram = diagram
@@ -37,6 +41,7 @@ struct FlowLayoutRun {
         guard refusal == nil else { return }
         orderNodes()
         placeNodes()
+        assignPorts()
         planChannels()
         routeEdges()
     }

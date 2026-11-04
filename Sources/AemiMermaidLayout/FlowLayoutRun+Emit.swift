@@ -47,6 +47,8 @@ extension FlowLayoutRun {
         var flipped: Bool
         var extentA: Int32
         var margin: Int32
+        /// Cells added before the order axis for what sticks out of it.
+        var shiftB: Int32 = 0
 
         /// A box of the abstract plane, as x, y, width, height.
         func box(_ posA: Int32, _ posB: Int32, _ sizeA: Int32, _ sizeB: Int32) -> (
@@ -54,14 +56,15 @@ extension FlowLayoutRun {
         ) {
             let along = flipped ? extentA - posA - sizeA : posA
             return vertical
-                ? (ScenePoint(x: posB + margin, y: along + margin), sizeB, sizeA)
-                : (ScenePoint(x: along + margin, y: posB + margin), sizeA, sizeB)
+                ? (ScenePoint(x: posB + margin + shiftB, y: along + margin), sizeB, sizeA)
+                : (ScenePoint(x: along + margin, y: posB + margin + shiftB), sizeA, sizeB)
         }
 
         func point(_ pointA: Int32, _ pointB: Int32) -> ScenePoint {
             let along = flipped ? extentA - 1 - pointA : pointA
             return vertical
-                ? ScenePoint(x: pointB + margin, y: along + margin) : ScenePoint(x: along + margin, y: pointB + margin)
+                ? ScenePoint(x: pointB + margin + shiftB, y: along + margin)
+                : ScenePoint(x: along + margin, y: pointB + margin + shiftB)
         }
     }
 
@@ -72,10 +75,11 @@ extension FlowLayoutRun {
             vertical: diagram.direction.isVertical,
             flipped: diagram.direction == .bottomUp || diagram.direction == .rightLeft,
             extentA: extent.a,
-            margin: Int32(clusterDepth * 2)
+            margin: Int32(clusterDepth * 2),
+            shiftB: overhang
         )
-        scene.width = (placement.vertical ? extent.b : extent.a) + 2 * placement.margin
-        scene.height = (placement.vertical ? extent.a : extent.b) + 2 * placement.margin
+        scene.width = (placement.vertical ? extent.b + overhang : extent.a) + 2 * placement.margin
+        scene.height = (placement.vertical ? extent.a : extent.b + overhang) + 2 * placement.margin
         emitFrames(placement, into: &scene)
         emitNodes(placement, into: &scene)
         emitEdges(placement, into: &scene)

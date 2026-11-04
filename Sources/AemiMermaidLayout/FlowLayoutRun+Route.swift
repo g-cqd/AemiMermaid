@@ -9,6 +9,35 @@ extension FlowLayoutRun {
         return diagram.direction.isVertical ? lines.lines.count : lines.width + 2
     }
 
+    /// Where an edge's label goes, and the room it needs: beside the line on the side its edge turns to, or on the other side when that would be off the chart.
+    private mutating func labelPlace(_ edge: Int, from: Int32, towardsLow: Bool, channelStart: Int32) -> (
+        a: Int32, b: Int32
+    ) {
+        let width = Int32(labelWidth(edge))
+        let slot = Int32(labelSlot[edge])
+        let low = towardsLow
+        if diagram.direction.isVertical {
+            // On the right of a line that has a sibling to its right, past that sibling.
+            let b = low ? from - 1 - width : from + 2 + Swift.max(0, -portShift[edge]) * 2
+            extent.b = Swift.max(extent.b, b + width)
+            overhang = Swift.max(overhang, -b)
+            return (channelStart + slot, b)
+        }
+        let b = low ? from - 1 - slot : from + 1 + slot
+        extent.b = Swift.max(extent.b, b + 1)
+        overhang = Swift.max(overhang, -b)
+        return (channelStart + 1, b)
+    }
+
+    private func labelWidth(_ edge: Int) -> Int {
+        LabelLines(
+            diagram.labels.slice(diagram.edges[edge].label),
+            maxColumns: metrics.maxLabelColumns,
+            metrics: metrics
+        )
+        .width
+    }
+
     /// Phase 6: the lanes each channel between two ranks needs, and with them where each rank starts along the rank axis.
     ///
     /// A hop of an edge from rank r to r+1 that changes order position needs a horizontal run (a lane) in the channel below r; runs that overlap take different
@@ -24,8 +53,8 @@ extension FlowLayoutRun {
         labelSlot = [Int](repeating: 0, count: graph.chains.count)
         for (edge, chain) in graph.chains.enumerated() where chain.count >= 2 && chain[0] != chain[chain.count - 1] {
             for hop in 0 ..< (chain.count - 1) {
-                let from = graph.center(chain[hop])
-                let to = graph.center(chain[hop + 1])
+                let from = column(edge, hop: hop, ends: false)
+                let to = column(edge, hop: hop, ends: true)
                 let rank = Int(graph.rank[Int(chain[hop])])
                 if from != to { hops[rank].append((edge, hop, Swift.min(from, to), Swift.max(from, to))) }
                 if hop == 0, labelExtent(edge) > 0 {
@@ -108,8 +137,8 @@ extension FlowLayoutRun {
                     let from = chain[hop]
                     let to = chain[hop + 1]
                     let rank = Int(graph.rank[Int(from)])
-                    let fromB = graph.center(from)
-                    let toB = graph.center(to)
+                    let fromB = column(edge, hop: hop, ends: false)
+                    let toB = column(edge, hop: hop, ends: true)
                     let channelStart = rankStart[rank] + rankSize[rank]
                     let leave: Int32 =
                         from < Int32(graph.realCount)
@@ -123,10 +152,9 @@ extension FlowLayoutRun {
                     }
                     points.append((arrive, toB))
                     if hop == 0, !diagram.edges[edge].label.isEmpty {
-                        label =
-                            diagram.direction.isVertical
-                            ? (channelStart + Int32(labelSlot[edge]), fromB + 2)
-                            : (channelStart + 1, fromB - 1 - Int32(labelSlot[edge]))
+                        // The label goes on the side its edge turns to: left of the line when the target is to the left (above it when the target is above).
+                        let towardsLow = toB < fromB || (toB == fromB && portShift[edge] < 0)
+                        label = labelPlace(edge, from: fromB, towardsLow: towardsLow, channelStart: channelStart)
                     }
                 }
             }

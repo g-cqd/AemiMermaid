@@ -40,7 +40,7 @@ public struct SVGRenderer: Sendable {
                 case .trailing: "end"
             }
         let px = text.anchor == .leading ? x(Int32(text.x)) : cx(Int32(text.x))
-        let role = text.role == .clusterTitle ? "ct" : "l"
+        let role = text.role == .clusterTitle ? "ct" : (text.role == .label ? "el" : "l")
         return line(scene.string(text.text), x: px, baseline: cy(text.y) + 4.5, anchor: anchor, class: role)
     }
 
