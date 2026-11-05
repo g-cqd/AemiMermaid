@@ -31,7 +31,7 @@ extension FlowLayoutRun {
     }
 
     /// How deeply clusters nest at most: the margin the frames need around the drawing.
-    private var clusterDepth: Int {
+    var clusterDepth: Int {
         var depth = [Int](repeating: 1, count: diagram.clusters.count)
         var most = 0
         for (index, cluster) in diagram.clusters.enumerated() {

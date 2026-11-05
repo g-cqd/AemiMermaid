@@ -81,3 +81,45 @@ struct EdgePortsTests {
         }
     }
 }
+
+/// Frames round clusters do not run into one another or into the nodes outside them.
+@Suite("Cluster frames")
+struct ClusterFrameTests {
+    private func frames(_ source: String) -> (frames: [SceneShape], others: [SceneShape]) {
+        let parse = MermaidParse.parse(Array(source.utf8), limits: .terminal)
+        var scene = DiagramScene()
+        _ = MermaidLayout.lay(parse.result, maxWidth: 200, into: &scene)
+        return (scene.shapes.filter { $0.kind == .frame }, scene.shapes.filter { $0.kind != .frame })
+    }
+
+    private func overlap(_ a: SceneShape, _ b: SceneShape) -> Bool {
+        a.x < b.x + b.width && b.x < a.x + a.width && a.y < b.y + b.height && b.y < a.y + a.height
+    }
+
+    @Test func `two sibling clusters do not overlap`() {
+        let found = frames(
+            "flowchart LR\n  subgraph A\n    a1 --> a2\n  end\n  subgraph B\n    b1 --> b2\n  end\n  a1 --> b1\n  b2 -.-> w([W])"
+        )
+        #expect(found.frames.count == 2 && !overlap(found.frames[0], found.frames[1]))
+    }
+
+    @Test func `a node outside every cluster is outside every frame`() {
+        let found = frames("flowchart TD\n  subgraph C\n    a1 --> a2\n  end\n  u([User]) --> a1\n  a2 --> z([Z])")
+        let outside = found.others.filter { shape in
+            !found.frames.contains {
+                $0.x <= shape.x && shape.x + shape.width <= $0.x + $0.width && $0.y <= shape.y
+                    && shape.y + shape.height <= $0.y + $0.height
+            }
+        }
+        #expect(outside.count == 2, "the user and the target are outside, the cluster's two nodes inside")
+    }
+
+    @Test func `nested clusters keep their children inside and siblings apart`() {
+        let found = frames(
+            "flowchart TD\n  subgraph O\n    subgraph P\n      p1 --> p2\n    end\n    subgraph Q\n      q1 --> q2\n    end\n  end\n  p2 --> q1"
+        )
+        #expect(found.frames.count == 3)
+        let inner = found.frames.filter { $0.width < found.frames.map(\.width).max() ?? 0 }
+        #expect(inner.count == 2 && !overlap(inner[0], inner[1]))
+    }
+}

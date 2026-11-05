@@ -69,6 +69,23 @@ extension FlowLayoutRun {
         .width
     }
 
+    /// The frames (clusters, with those that hold them) of the real nodes in each rank.
+    private func frames(inRank rank: Int) -> Set<Int> {
+        var found: Set<Int> = []
+        for node in graph.layers[rank] where Int(node) < diagram.nodes.count {
+            var cluster = Int(diagram.nodes[Int(node)].cluster)
+            while cluster >= 0, found.insert(cluster).inserted { cluster = Int(diagram.clusters[cluster].parent) }
+        }
+        return found
+    }
+
+    /// How many frames end with `rank` or begin with the one after it.
+    private func framesChanging(after rank: Int) -> Int {
+        let here = frames(inRank: rank)
+        let next = frames(inRank: rank + 1)
+        return here.subtracting(next).count + next.subtracting(here).count
+    }
+
     /// Phase 6: the lanes each channel between two ranks needs, and with them where each rank starts along the rank axis.
     ///
     /// A hop of an edge from rank r to r+1 that changes order position needs a horizontal run (a lane) in the channel below r; runs that overlap take different
@@ -125,7 +142,9 @@ extension FlowLayoutRun {
             if size == 0 { size = 1 }
             rankStart.append(cursor)
             rankSize.append(size)
-            let height = Int32(stub[rank] + lanes[rank] + 1 + metrics.rankGap)
+            // A frame is drawn two cells outside its nodes: the channel leaves room for the border of each frame that ends above it and each that begins below it.
+            let frames = rank + 1 < rankCount ? 2 * framesChanging(after: rank) : 0
+            let height = Int32(stub[rank] + lanes[rank] + 1 + metrics.rankGap + frames)
             channel.append(height)
             cursor += size + (rank + 1 < rankCount ? height : 0)
             for node in graph.layers[rank] where graph.sizeA[Int(node)] > 0 { graph.posA[Int(node)] = rankStart[rank] }

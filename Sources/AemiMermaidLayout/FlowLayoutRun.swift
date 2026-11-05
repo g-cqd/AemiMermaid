@@ -43,7 +43,9 @@ struct FlowLayoutRun {
         addVirtualNodes()
         guard refusal == nil else { return }
         orderNodes()
+        groupClusters()
         placeNodes()
+        separateClusters()
         assignPorts()
         planChannels()
         routeEdges()
