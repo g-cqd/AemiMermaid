@@ -6,6 +6,11 @@ import Testing
 @testable import AemiMermaidScene
 @testable import AemiMermaidSyntax
 
+// On Linux, XMLParser is in FoundationXML.
+#if canImport(FoundationXML)
+    import FoundationXML
+#endif
+
 /// The vector backend draws what the cell backend draws (ADR 0006), as markup that is well formed and carries nothing a label could have put there.
 @Suite("A scene as SVG")
 struct SVGTests {
@@ -28,7 +33,12 @@ struct SVGTests {
     private func inspect(_ markup: String) -> Elements? {
         let delegate = Elements()
         let parser = XMLParser(data: Data(markup.utf8))
-        unsafe parser.delegate = delegate
+        // Darwin's delegate is an unowned(unsafe) reference; corelibs Foundation's is a plain weak one.
+        #if canImport(FoundationXML)
+            parser.delegate = delegate
+        #else
+            unsafe parser.delegate = delegate
+        #endif
         return parser.parse() ? delegate : nil
     }
 

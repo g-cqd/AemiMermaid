@@ -61,14 +61,18 @@ struct GrowthTests {
         return Double(delta.instructions)
     }
 
-    @Test(arguments: [
-        ("chain", GrowthTests.chain), ("tree", GrowthTests.tree), ("sparse", GrowthTests.sparse),
-        ("clusters", GrowthTests.clusters)
-    ])
+    // Hosted CI runners are virtual machines with no performance counters: they count no instructions, which says nothing of the cost.
+    @Test(
+        .enabled(if: ProcessProbe.snapshot().instructions > 0, "instructions are not counted on this machine"),
+        arguments: [
+            ("chain", GrowthTests.chain), ("tree", GrowthTests.tree), ("sparse", GrowthTests.sparse),
+            ("clusters", GrowthTests.clusters)
+        ]
+    )
     func `a doubling of the nodes costs less than triple`(name: String, make: @Sendable (Int) -> String) throws {
         // The least of three runs: another test running on another thread can only add to a count, so the least is the run it disturbed least.
         let costs = Self.sizes.map { size in (0 ..< 3).map { _ in instructions(make(size)) }.min() ?? 0 }
-        try #require(costs.allSatisfy { $0 > 0 }, "instructions are not counted on this machine")
+        try #require(costs.allSatisfy { $0 > 0 }, "a measured run counted no instructions")
         for (index, pair) in zip(costs, costs.dropFirst()).enumerated() {
             #expect(
                 pair.1 / pair.0 < 3.2,
