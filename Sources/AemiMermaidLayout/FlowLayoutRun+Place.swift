@@ -83,6 +83,11 @@ extension FlowLayoutRun {
                 for rank in (0 ..< Swift.max(0, graph.layers.count - 1)).reversed() { fit(rank, towards: graph.lower) }
             }
         }
+        fitExtent()
+    }
+
+    /// Moves every node so the leftmost is at 0 along the order axis, and sets how far the chart reaches.
+    mutating func fitExtent() {
         let low = graph.posB.min() ?? 0
         for node in 0 ..< graph.count { graph.posB[node] -= low }
         var high: Int32 = 0

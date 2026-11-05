@@ -88,11 +88,7 @@ extension FlowLayoutRun {
             }
             separate(&items)
         }
-        let low = graph.posB.min() ?? 0
-        for node in 0 ..< graph.count { graph.posB[node] -= low }
-        var high: Int32 = 0
-        for node in 0 ..< graph.count { high = Swift.max(high, graph.posB[node] + graph.sizeB[node]) }
-        extent.b = high + (graph.chains.contains { $0.count >= 2 && $0[0] == $0[$0.count - 1] } ? 2 : 0)
+        fitExtent()
     }
 
     private mutating func separate(_ items: inout [(nodes: [Int32], margin: Int32)]) {
