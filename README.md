@@ -10,6 +10,9 @@ flowchart LR
   D --> B
 ```
 
+A `---` head before the diagram (Mermaid's front matter) is located and read by AemiHMMML: `MermaidParse.head` holds its `title`
+and `config`, and a broken head is a diagnostic, never a refusal (ADR 0008).
+
 | Target | Does | Imports |
 |---|---|---|
 | `AemiMermaidSyntax` | reads a source into a flowchart or a sequence diagram; limits, diagnostics, label cleaning | Aemi (`AemiInterner`) |

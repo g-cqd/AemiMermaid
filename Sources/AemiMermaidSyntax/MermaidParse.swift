@@ -9,6 +9,8 @@ public struct MermaidParse: Sendable {
 
     public var result: Result
     public var diagnostics: MermaidDiagnostics
+    /// The diagram's front matter (`---` … `---` before the header), read: its title and configuration.
+    public var head: MermaidHead?
 
     /// Reads `source`, a diagram in Mermaid's syntax, within `limits`. Never fails and never takes more than a fixed multiple of the source's size.
     /// - Complexity: O(source.count) apart from the quadratic step of `A & B --> C & D`, which the edge limit bounds.
@@ -21,6 +23,12 @@ public struct MermaidParse: Sendable {
         guard let header = MermaidHeader.find(in: source) else {
             return MermaidParse(result: .refused(.unknownKind), diagnostics: MermaidDiagnostics())
         }
+        var parse = diagram(source, limits, header)
+        parse.head = header.frontMatter.map { MermaidHead($0, in: source) }
+        return parse
+    }
+
+    private static func diagram(_ source: [UInt8], _ limits: MermaidLimits, _ header: MermaidHeader) -> MermaidParse {
         switch header.kind {
             case .flowchart: return flowchart(source, limits, header)
             case .state:

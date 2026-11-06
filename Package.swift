@@ -18,6 +18,12 @@ let aemiDependency: Package.Dependency = .package(
     revision: "e30aad82377cbea62171cc722a88041e97021db2"
 )
 
+// AemiHMMML's front matter locator and YAML reader (its ADR-0009 and ADR-0015), for the diagram's `---` head.
+let hmmmlDependency: Package.Dependency = .package(
+    url: "https://github.com/g-cqd/AemiHMMML.git",
+    revision: "3c27b56758d95a24e95a4b106cf59507d570f11d"
+)
+
 let package = Package(
     name: "AemiMermaid",
     platforms: [.macOS(.v15), .iOS(.v18), .tvOS(.v18), .watchOS(.v11), .visionOS(.v2)],
@@ -29,11 +35,17 @@ let package = Package(
         .library(name: "AemiMermaidSVG", targets: ["AemiMermaidSVG"]),
         .executable(name: "aemi-mermaid", targets: ["aemi-mermaid"])
     ],
-    dependencies: [aemiDependency],
+    dependencies: [aemiDependency, hmmmlDependency],
     targets: [
         .target(
             name: "AemiMermaidSyntax",
-            dependencies: ["AemiMermaidScene", .product(name: "AemiInterner", package: "aemi")],
+            dependencies: [
+                "AemiMermaidScene",
+                .product(name: "AemiInterner", package: "aemi"),
+                .product(name: "AemiFrontMatter", package: "AemiHMMML"),
+                .product(name: "AemiHMMMLCore", package: "AemiHMMML"),
+                .product(name: "AemiYAML", package: "AemiHMMML")
+            ],
             swiftSettings: strictSettings
         ),
         .target(name: "AemiMermaidScene", swiftSettings: strictSettings),
@@ -73,7 +85,9 @@ let package = Package(
             name: "AemiMermaidTests",
             dependencies: [
                 "AemiMermaidSyntax", "AemiMermaidScene", "AemiMermaidLayout", "AemiMermaidText", "AemiMermaidSVG",
-                .product(name: "AemiTestKit", package: "aemi")
+                .product(name: "AemiTestKit", package: "aemi"),
+                .product(name: "AemiHMMMLCore", package: "AemiHMMML"),
+                .product(name: "AemiYAML", package: "AemiHMMML")
             ],
             swiftSettings: strictSettings
         )
