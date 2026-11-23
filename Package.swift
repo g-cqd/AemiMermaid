@@ -15,13 +15,13 @@ let strictSettings: [SwiftSetting] = [
 
 let aemiDependency: Package.Dependency = .package(
     url: "https://github.com/Aemi-Studio/aemi.git",
-    revision: "44267bd0b5b07cbb6f14320dae0449f49bb531cd"
+    revision: "e34e3e517176a04f64e5d56e16f5019e55392a90"
 )
 
 // AemiHMMML's front matter locator and YAML reader (its ADR-0009 and ADR-0015), for the diagram's `---` head.
 let hmmmlDependency: Package.Dependency = .package(
     url: "https://github.com/g-cqd/AemiHMMML.git",
-    revision: "537f7c081681e2c9cdd83d4019dfd29f567fa145"
+    revision: "23d9a9d020cda1d215bd05fd9ace215c38198038"
 )
 
 let package = Package(
