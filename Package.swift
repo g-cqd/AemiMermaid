@@ -21,7 +21,7 @@ let aemiDependency: Package.Dependency = .package(
 // AemiHMMML's front matter locator and YAML reader (its ADR-0009 and ADR-0015), for the diagram's `---` head.
 let hmmmlDependency: Package.Dependency = .package(
     url: "https://github.com/g-cqd/AemiHMMML.git",
-    revision: "23d9a9d020cda1d215bd05fd9ace215c38198038"
+    revision: "ff6f0d21a99fde3336c711a8d7f1200a7156ff50"
 )
 
 let package = Package(
