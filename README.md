@@ -1,51 +1,51 @@
 # AemiMermaid
 
-Mermaid diagrams for terminals and windows, read and laid out by our own code: UTF-8 bytes in, a flat scene out, bounded in time and memory, never failing. No other package is
-needed to read, lay out or draw a diagram; the renderers that exist (mermaid.js, `mermaid-ascii`, `mermaid-swift` and the others in the survey) are oracles run from scripts.
-
-```
-flowchart LR
-  A[Parse] --> B[Layout] --> C[Draw]
-  B -->|too wide| D{{Wrap}}
-  D --> B
-```
-
-A `---` head before the diagram (Mermaid's front matter) is located and read by AemiHMMML: `MermaidParse.head` holds its `title`
-and `config`, and a broken head is a diagnostic, never a refusal (ADR 0008).
-
-| Target | Does | Imports |
-|---|---|---|
-| `AemiMermaidSyntax` | reads a source into a flowchart or a sequence diagram; limits, diagnostics, label cleaning | Aemi (`AemiInterner`) |
-| `AemiMermaidScene` | the display list a layout produces, roles instead of colours, the text metrics | nothing |
-| `AemiMermaidLayout` | flowcharts (layered, in cells) and sequence diagrams | Syntax, Scene |
-| `AemiMermaidText` | draws a scene in character cells: box characters or ASCII | Scene |
-| `aemi-mermaid` | `aemi-mermaid [--ascii] [--width N] [file]` draws a diagram in the terminal | all |
+Mermaid diagram parser, layout engine, and terminal/SVG renderers written in Swift 6. Takes UTF-8 source bytes and produces a flat, semantic `DiagramScene` with bounded time and memory and total, non-failing parsing.
 
 ```swift
+import AemiMermaidLayout
+import AemiMermaidScene
+import AemiMermaidSyntax
+import AemiMermaidText
+
 let parse = MermaidParse.parse(Array(source.utf8), limits: .terminal)
 var scene = DiagramScene()
-if case .drawn = MermaidLayout.lay(parse.result, maxWidth: 80, into: &scene),
-    let lines = TextRenderer().text(scene)
-{
-    print(lines.joined(separator: "\n"))
+if case .drawn = MermaidLayout.lay(parse, into: &scene, limits: .terminal) {
+    let text = MermaidTextRenderer.render(scene)
+    print(text)
 }
 ```
 
-What it accepts (flowchart: the headers, shapes, links, labels, chains, groups and subgraphs of the plan's Appendix B; sequence: participants, actors, the eight arrows, activations,
-notes, fragments, autonumber, title; state, class and entity-relationship diagrams, read as flowcharts (ADR 0005); pie charts as bars) and how it degrades are in `docs/adr/0001-the-engine.md`. A line it cannot read is dropped with a diagnostic naming it; a diagram it cannot
-draw within the limits is refused with the figure, and the host shows the source.
+## Requirements
 
-Not done yet: Gantt, mindmap, journey, timeline and git graph; the vector backend and the SwiftUI view; the Quick Look extension (ask's roadmap 0199 to 0201).
+- Swift 6.4+ (Swift 6 language mode)
+- macOS 15+, iOS 18+, tvOS 18+, watchOS 11+, visionOS 2+, or Linux
 
-## Guarantees, each with a test
+## Installation
 
-- **No recursion, linear time.** Nesting is a counter or a stack with a limit; the growth test fits instructions against 100 to 800 nodes for chains, trees, sparse graphs and clusters
-  and fails when a doubling costs more than three times; the corpus runs on a 512 KiB stack.
-- **Nothing a terminal could act on.** Labels are cleaned when read (controls, C1, bidirectional controls, byte order marks, invalid UTF-8) and the cell backend cleans again; a
-  fuzz test checks every row of mutated diagrams.
-- **Bounded.** `MermaidLimits` caps source, nodes, edges, labels, nesting, messages and virtual nodes; each limit has a test that hits it.
-- **Within the width.** A width sweep draws every corpus diagram at every width from 1 to 120, wider than it never, and the same whatever width was asked before.
+```swift
+dependencies: [
+    .package(url: "https://github.com/g-cqd/AemiMermaid.git", branch: "main")
+]
+```
 
-## Developing
+## Products
 
-`swift test` (the allocation and growth tests are meaningful in debug and release alike). Style is Aemi's (`.swift-format`, `.swiftlint.yml`); one primary type per file, under 250 lines.
+| Product | Description |
+| --- | --- |
+| `AemiMermaidSyntax` | Flowchart, sequence, and front-matter parser with explicit limits and diagnostics |
+| `AemiMermaidScene` | Flat display list with semantic roles and text metrics |
+| `AemiMermaidLayout` | Layered flowchart and sequence diagram layout |
+| `AemiMermaidText` | Unicode box-drawing and ASCII terminal renderer |
+| `AemiMermaidSVG` | SVG renderer |
+| `aemi-mermaid` | CLI: `aemi-mermaid [--ascii] [--width N] [file]` |
+
+## Documentation
+
+- [Architecture Decisions](docs/adr/)
+- [Contributing](CONTRIBUTING.md)
+- [Security](SECURITY.md)
+
+## License
+
+[MIT](LICENSE)

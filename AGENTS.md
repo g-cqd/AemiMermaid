@@ -1,12 +1,23 @@
-# Working in AemiMermaid
+# Working in `AemiMermaid`
 
-Mermaid diagrams read, laid out and drawn by our own code. Read `docs/adr/0001-the-engine.md` first.
+Pure-Swift Mermaid parser, layout engine, and text/SVG renderers (`g-cqd/AemiMermaid`).
 
-- **No recursion, no failure.** Any bytes give a parse result; nesting is a counter or an explicit stack with a limit in `MermaidLimits`. A new loop needs its bound.
-- **Linear time.** `GrowthTests` fits instructions against size; a change that makes a doubling cost more than three times fails it. Fix the cause (the test found a drifting
-  chain on its first run).
-- **Text is cleaned on the way in and again on the way out.** `LabelSanitizer` for the source, the cell writer for the scene. Never hand a label to a terminal without the second.
-- **Roles, not colours.** A scene says what a shape is for; a backend picks the style.
-- **A test that cannot fail says nothing.** `SceneLinterTests` shows the linter finds what it is for; a new rule gets a failing case first.
-- **Dependencies:** packages from `g-cqd`, `Aemi-Studio`, `apple` and `swiftlang` only. The external Mermaid renderers are oracles in scripts.
-- Style: Aemi's `.swift-format` and `.swiftlint.yml`; one primary type per file; files under 250 lines; docs say why, not what.
+## Engineering principles
+
+- **Verify claims with executable checks.** Write a failing test or measurement before changing behaviour; never state unmeasured performance or unverified behaviour as fact.
+- **Strictness.** Swift 6 language mode, strict concurrency, strict memory safety where configured, and warnings as errors. No force-unwraps or force-casts in production paths.
+- **Bounded work and safety.** Bound untrusted inputs, recursion depth, and memory before allocation; handle errors explicitly without crashing on hostile input.
+- **Factual documentation.** Keep `README.md`, user docs, and `Package.swift` aligned with the current codebase—no roadmaps, speculative plans, or diary logs in public docs.
+
+Keep `AemiMermaidScene` dependency-free and maintain bounded node/edge/grid limits on all layouts.
+
+## Commands
+
+```sh
+swift test
+swift format lint --strict --recursive Sources Tests Package.swift
+```
+
+## Architecture records
+
+Accepted architectural decisions live in `docs/adr/` (when present). Only add a new ADR for durable architectural choices; mark superseded records clearly.

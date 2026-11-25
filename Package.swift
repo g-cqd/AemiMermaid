@@ -1,8 +1,6 @@
 // swift-tools-version: 6.4
 import PackageDescription
 
-// Swift 6 language mode, warnings as errors, and the upcoming features that tighten existentials and imports. No unsafe flags, so the library can be
-// consumed through a version-pinned requirement. Same strictness as AemiMarkdown.
 let strictSettings: [SwiftSetting] = [
     .swiftLanguageMode(.v6),
     .treatAllWarnings(as: .error),
@@ -18,7 +16,6 @@ let aemiDependency: Package.Dependency = .package(
     revision: "bd5e4cf4441ca3ed1b424935142586ccaac0f835"
 )
 
-// AemiHMMML's front matter locator and YAML reader (its ADR-0009 and ADR-0015), for the diagram's `---` head.
 let hmmmlDependency: Package.Dependency = .package(
     url: "https://github.com/g-cqd/AemiHMMML.git",
     revision: "77dc8e23456150cd47bab269b785fcbf7ca29e00"
@@ -71,7 +68,6 @@ let package = Package(
             ],
             swiftSettings: strictSettings
         ),
-        // Alone in its process: it counts instructions, and a count is only a count of this test when no other test runs beside it.
         .testTarget(
             name: "AemiMermaidGrowthTests",
             dependencies: [
