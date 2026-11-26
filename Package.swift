@@ -13,12 +13,12 @@ let strictSettings: [SwiftSetting] = [
 
 let aemiDependency: Package.Dependency = .package(
     url: "https://github.com/Aemi-Studio/aemi.git",
-    revision: "1567137e2c810eb489facf29d90a2c623b75d604"
+    revision: "9f8d1a3eafed0ad23919b9c68d33606632ce0659"
 )
 
 let hmmmlDependency: Package.Dependency = .package(
     url: "https://github.com/g-cqd/AemiHMMML.git",
-    revision: "dd439204570a9969612ea009608ec39e455c6a33"
+    revision: "2daa7f8c91cd9aada423ae6c62cde19fcf9d6795"
 )
 
 let package = Package(
